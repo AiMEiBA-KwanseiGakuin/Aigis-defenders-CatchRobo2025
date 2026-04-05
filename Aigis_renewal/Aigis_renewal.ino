@@ -62,7 +62,7 @@ struct {
 //           END RemoteXY include          //
 /////////////////////////////////////////////
 
-enum ID{
+enum MOTOR_ID{
   X_AXIS, Y_AXIS, Z_AXIS, HAND
 };
 
@@ -124,9 +124,9 @@ void loop(){
   // do not call delay(), use instead RemoteXYEngine.delay() 
 }
 
-void driveMotor(int id, int speed){
-  ledcWrite(id*2, speed>0? speed: 0);
-  ledcWrite(id*2+1, speed<0? -speed: 0);
+void driveMotor(int idx, int speed){
+  ledcWrite(idx*2, speed>0? speed: 0);
+  ledcWrite(idx*2+1, speed<0? -speed: 0);
 }
 
 int sign(int x){
