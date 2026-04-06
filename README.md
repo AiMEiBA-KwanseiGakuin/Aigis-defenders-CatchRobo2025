@@ -5,7 +5,7 @@
 
 ## 操縦方法
 
-1. RemoteXYアプリを入れたAndroidスマホを用意する(課金は必要ない)
+1. RemoteXYアプリを入れたAndroidスマホを用意する(課金は必要ない) ←金栄の私物があるのでそれ使う？
 2. スマホのBluetoothをONにした状態でRemoteXYアプリを開き、左上の「三」→「New dwvice」→「Bluetooth classic」で「Aigis_ver2」を選択、操作画面を開く
 3. 左のボタンを押してONにして、ESP32が青く光るのを確認する
 4. 真ん中のオレンジの〇を上下左右に動かすとアームが前後左右に動く
