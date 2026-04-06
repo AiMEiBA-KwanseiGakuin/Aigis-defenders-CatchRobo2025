@@ -69,7 +69,7 @@ const uint8_t pin_xmotor[] = {14,27};
 const uint8_t pin_ymotor[] = {26,25};
 const uint8_t pin_zmotor[] = {33,32};
 const uint8_t pin_rhand = 18;
-const uint8_t pin_lhand = 19;
+const uint8_t pin_lhand = 21;
 const uint8_t pin_led = 2;
 
 
@@ -105,9 +105,9 @@ void loop(){
   RemoteXYEngine.handler();
   if(RemoteXY.connect_flag && RemoteXY.pushSwitch_01){
     
-    Xmotor.move(RemoteXY.joystick_01_x>range_ignore? RemoteXY.joystick_01_x*2: 0);
-    Ymotor.move(RemoteXY.joystick_01_y>range_ignore? RemoteXY.joystick_01_y*2: 0);
-    Zmotor.move(RemoteXY.slider_01>range_ignore? RemoteXY.slider_01*2: 0);
+    Xmotor.move(abs(RemoteXY.joystick_01_x)>range_ignore? RemoteXY.joystick_01_x*2: 0);
+    Ymotor.move(abs(RemoteXY.joystick_01_y)>range_ignore? RemoteXY.joystick_01_y*2: 0);
+    Zmotor.move(abs(RemoteXY.slider_01)>range_ignore? RemoteXY.slider_01*2: 0);
     
     hand_angle = constrain((abs(RemoteXY.slider_02) > range_ignore? sign(RemoteXY.slider_02)*hand_speed: 0) + hand_angle, hand_min, hand_max);
     Rhand.write(180-hand_angle);
