@@ -1,3 +1,4 @@
+
 /*
    -- Aigis_ver2 --
    
@@ -64,7 +65,7 @@ struct {
 #include <ESP32Servo.h>
 
 enum MOTOR_ID{
-  X_AXIS, Y_AXIS, Z_AXIS, HAND
+  X_AXIS, Y_AXIS, Z_AXIS, HAND, LED=8
 };
 
 const int ignore_range[] = {
@@ -73,7 +74,7 @@ const int ignore_range[] = {
 
 const int pins[] = {
 //x1  x2  y1  y2  z1  z2   hand  led
-  13, 12, 14, 27, 26, 25, 33, 15, 2
+  2, 12, 14, 27, 26, 25, 15, 33, 13
 };
 
 int hand_angle;
@@ -84,50 +85,59 @@ Servo hand_L;
 
 void setup(){
   RemoteXY_Init();
-  for(int i=0; i<HAND*2; i++){
+  for(int i=0; i<6; i++){
     ledcAttach(pins[i], 12800, 8);
-    ledcWrite(pins[i], 0);
+    //ledcWrite(pins[i], 0);
   }
-  hand_R.setPeriodHertz(50);
-  hand_L.setPeriodHertz(50);
-  hand_R.attach(pins[HAND*2+0], 500, 2400);
-  hand_L.attach(pins[HAND*2+1], 500, 2400);
-  ledcAttach(pins[8], 12800, 8);
+  //ledcAttach(pins[0],12800,8);
+  //hand_R.setPeriodHertz(50);
+  //hand_L.setPeriodHertz(50);
+  hand_R.attach(pins[6]);//500,2400);
+  hand_L.attach(pins[7]);
+  ledcAttach(pins[LED], 12800, 8);
+  //ledcAttach(pins[5], 12800, 8);
+  Serial.begin(9600);
 }
 
 void loop(){
   RemoteXYEngine.handler();
   if(RemoteXY.connect_flag && RemoteXY.pushSwitch_01){
-    ledcWrite(pins[8], 200);
+    ledcWrite(pins[LED], 0);
 
     //x軸移動
-    driveMotor(X_AXIS, abs(RemoteXY.joystick_01_x) > ignore_range[X_AXIS]? RemoteXY.joystick_01_x*2: 0);
+    //driveMotor(X_AXIS, abs(RemoteXY.joystick_01_x) > ignore_range[X_AXIS]? RemoteXY.joystick_01_x*2: 0);
   
     //y軸移動
-    driveMotor(Y_AXIS, abs(RemoteXY.joystick_01_y) > ignore_range[Y_AXIS]? RemoteXY.joystick_01_y*2: 0);
+    //driveMotor(Y_AXIS, abs(RemoteXY.joystick_01_y) > ignore_range[Y_AXIS]? RemoteXY.joystick_01_y*2: 0);
 
     //z軸移動
-    driveMotor(Z_AXIS, abs(RemoteXY.slider_01) > ignore_range[Z_AXIS]? RemoteXY.slider_01*2: 0);
+    //driveMotor(Z_AXIS, abs(RemoteXY.slider_01) > ignore_range[Z_AXIS]? RemoteXY.slider_01*2: 0);
   
     //ハンド開閉
-    if(abs(RemoteXY.slider_02) > ignore_range[HAND]){
-      hand_angle = constrain(sign(RemoteXY.slider_02)*hand_speed + hand_angle, hand_min, hand_max);
-      hand_R.write(hand_angle);
-      hand_L.write(180-hand_angle);
-    }
-    
+    hand_angle = constrain((abs(RemoteXY.slider_02) > ignore_range[HAND]? sign(RemoteXY.slider_02)*hand_speed: 0) + hand_angle, hand_min, hand_max);
+    hand_R.write(hand_angle);
+    hand_L.write(180-hand_angle);
+    Serial.println(hand_angle);
+    //RemoteXYEngine.delay(10);
+
   }else{
-    for(int i=0; i<HAND*2; i++){
-      ledcWrite(pins[i], 0);
-    }
-    ledcWrite(pins[8], 0);
+    //for(int i=0; i<6; i++){
+      //ledcWrite(pins[i], 0);
+    //}
+    ledcWrite(pins[LED], 200);
+    hand_R.write(90);
+    hand_L.write(90);
+    RemoteXYEngine.delay(500);
+    hand_R.write(0);
+    hand_L.write(0);
+    RemoteXYEngine.delay(500);
   }
   // do not call delay(), use instead RemoteXYEngine.delay() 
 }
 
 void driveMotor(int idx, int speed){
-  ledcWrite(idx*2, speed>0? speed: 0);
-  ledcWrite(idx*2+1, speed<0? -speed: 0);
+  ledcWrite(pins[idx*2], speed>0? speed: 0);
+  ledcWrite(pins[idx*2+1], speed<0? -speed: 0);
 }
 
 int sign(int x){
