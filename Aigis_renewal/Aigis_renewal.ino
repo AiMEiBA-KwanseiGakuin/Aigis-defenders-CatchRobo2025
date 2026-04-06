@@ -42,8 +42,8 @@ uint8_t const PROGMEM RemoteXY_CONF_PROGMEM[] =   // 80 bytes V19
   { 255,5,0,0,0,73,0,19,0,0,0,0,28,2,106,200,200,84,1,1,
   4,0,5,238,21,143,143,69,8,69,69,32,2,26,31,4,17,26,7,86,
   157,2,14,83,48,2,26,4,38,67,7,86,11,56,56,13,176,2,26,10,
-  248,22,57,57,31,17,18,18,49,134,26,31,79,78,0,31,79,70,70,0 };
-  
+  248,22,57,57,31,17,18,18,49,134,26,31,79,78,0,31,79,70,70,0 };  
+
 // this structure defines all the variables and events of your control interface 
 struct {
     // input variables
@@ -55,89 +55,86 @@ struct {
     // other variable
   uint8_t connect_flag;  // =1 if wire connected, else =0
 
-} RemoteXY;
+} RemoteXY;   
 #pragma pack(pop)
  
 /////////////////////////////////////////////
 //           END RemoteXY include          //
 /////////////////////////////////////////////
 
+
+#include <AnalogMotorDriver.h>
 #include <ESP32Servo.h>
 
-enum MOTOR_ID{
-  X_AXIS, Y_AXIS, Z_AXIS, HAND, LED=8
-};
+const uint8_t pin_xmotor[] = {13,15};
+const uint8_t pin_ymotor[] = {14,27};
+const uint8_t pin_zmotor[] = {26,25};
+const uint8_t pin_rhand = 33;
+const uint8_t pin_lhand = 15;
+const uint8_t pin_led = 2;
 
-const int ignore_range[] = {
-  15, 15, 15, 5
-};
 
-const int pins[] = {
-//x1  x2  y1  y2  z1  z2   hand  led
-  2, 12, 14, 27, 26, 25, 15, 33, 13
-};
+const int range_ignore = 10;
+
+const int hand_max = 60;
+const int hand_min = 0;
+const int hand_speed = 2;
+
+
+AnalogMotor Xmotor;
+AnalogMotor Ymotor;
+AnalogMotor Zmotor;
 
 int hand_angle;
-const int hand_max = 60, hand_min = 0;
-const int hand_speed = 2;
-Servo hand_R;
-Servo hand_L;
+Servo Rhand, Lhand;
+
 
 void setup(){
   RemoteXY_Init();
-  for(int i=0; i<6; i++){
-    ledcAttach(pins[i], 12800, 8);
-    //ledcWrite(pins[i], 0);
-  }
-  //ledcAttach(pins[0],12800,8);
-  //hand_R.setPeriodHertz(50);
-  //hand_L.setPeriodHertz(50);
-  hand_R.attach(pins[6]);//500,2400);
-  hand_L.attach(pins[7]);
-  ledcAttach(pins[LED], 12800, 8);
-  //ledcAttach(pins[5], 12800, 8);
-  Serial.begin(9600);
+
+  Rhand.attach(pin_rhand);
+  Lhand.attach(pin_lhand);
+
+  ledcAttach(pin_led, 12800, 8);
+
+  Xmotor.attach(pin_xmotor);
+  //ledcAttach(pin_xmotor[0], 12800, 8);
+  //ledcAttach(pin_xmotor[1], 12800, 8);
+  Ymotor.attach(pin_ymotor);
+  Zmotor.attach(pin_zmotor);
 }
 
 void loop(){
   RemoteXYEngine.handler();
   if(RemoteXY.connect_flag && RemoteXY.pushSwitch_01){
-    ledcWrite(pins[LED], 0);
+    
+    Xmotor.move(RemoteXY.joystick_01_x>range_ignore? RemoteXY.joystick_01_x*2: 0);
+    //ledcWrite(pin_xmotor[0], RemoteXY.joystick_01_x>range_ignore? RemoteXY.joystick_01_x: 0);
+    //ledcWrite(pin_xmotor[1], RemoteXY.joystick_01_x<-range_ignore?-RemoteXY.joystick_01_x: 0);
+    Ymotor.move(RemoteXY.joystick_01_y>range_ignore? RemoteXY.joystick_01_y*2: 0);
+    Zmotor.move(RemoteXY.slider_01>range_ignore? RemoteXY.slider_01*2: 0);
+    
+    hand_angle = constrain((abs(RemoteXY.slider_02) > range_ignore? sign(RemoteXY.slider_02)*hand_speed: 0) + hand_angle, hand_min, hand_max);
+    Rhand.write(180-hand_angle);
+    Lhand.write(hand_angle);
 
-    //x軸移動
-    //driveMotor(X_AXIS, abs(RemoteXY.joystick_01_x) > ignore_range[X_AXIS]? RemoteXY.joystick_01_x*2: 0);
-  
-    //y軸移動
-    //driveMotor(Y_AXIS, abs(RemoteXY.joystick_01_y) > ignore_range[Y_AXIS]? RemoteXY.joystick_01_y*2: 0);
-
-    //z軸移動
-    //driveMotor(Z_AXIS, abs(RemoteXY.slider_01) > ignore_range[Z_AXIS]? RemoteXY.slider_01*2: 0);
-  
-    //ハンド開閉
-    hand_angle = constrain((abs(RemoteXY.slider_02) > ignore_range[HAND]? sign(RemoteXY.slider_02)*hand_speed: 0) + hand_angle, hand_min, hand_max);
-    hand_R.write(hand_angle);
-    hand_L.write(180-hand_angle);
-    Serial.println(hand_angle);
-    //RemoteXYEngine.delay(10);
-
-  }else{
-    //for(int i=0; i<6; i++){
-      //ledcWrite(pins[i], 0);
-    //}
-    ledcWrite(pins[LED], 200);
-    hand_R.write(90);
-    hand_L.write(90);
-    RemoteXYEngine.delay(500);
-    hand_R.write(0);
-    hand_L.write(0);
-    RemoteXYEngine.delay(500);
+    ledcWrite(pin_led, 200);
   }
-  // do not call delay(), use instead RemoteXYEngine.delay() 
-}
+  else{
+    Xmotor.move(0);
+    Ymotor.move(0);
+    Zmotor.move(0);
+    
+    Lhand.write(90);
+    Rhand.write(180);
+    RemoteXYEngine.delay(1000);
+    Lhand.write(0);
+    Rhand.write(90);
+    RemoteXYEngine.delay(1000);
+    
+    ledcWrite(pin_led, 0);
+  }
 
-void driveMotor(int idx, int speed){
-  ledcWrite(pins[idx*2], speed>0? speed: 0);
-  ledcWrite(pins[idx*2+1], speed<0? -speed: 0);
 }
 
 int sign(int x){
