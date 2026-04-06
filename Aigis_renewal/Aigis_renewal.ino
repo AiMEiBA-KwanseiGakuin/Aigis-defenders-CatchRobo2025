@@ -1,4 +1,3 @@
-
 /*
    -- Aigis_ver2 --
    
@@ -98,8 +97,6 @@ void setup(){
   ledcAttach(pin_led, 12800, 8);
 
   Xmotor.attach(pin_xmotor);
-  //ledcAttach(pin_xmotor[0], 12800, 8);
-  //ledcAttach(pin_xmotor[1], 12800, 8);
   Ymotor.attach(pin_ymotor);
   Zmotor.attach(pin_zmotor);
 }
@@ -109,8 +106,6 @@ void loop(){
   if(RemoteXY.connect_flag && RemoteXY.pushSwitch_01){
     
     Xmotor.move(RemoteXY.joystick_01_x>range_ignore? RemoteXY.joystick_01_x*2: 0);
-    //ledcWrite(pin_xmotor[0], RemoteXY.joystick_01_x>range_ignore? RemoteXY.joystick_01_x: 0);
-    //ledcWrite(pin_xmotor[1], RemoteXY.joystick_01_x<-range_ignore?-RemoteXY.joystick_01_x: 0);
     Ymotor.move(RemoteXY.joystick_01_y>range_ignore? RemoteXY.joystick_01_y*2: 0);
     Zmotor.move(RemoteXY.slider_01>range_ignore? RemoteXY.slider_01*2: 0);
     
@@ -124,14 +119,14 @@ void loop(){
     Xmotor.move(0);
     Ymotor.move(0);
     Zmotor.move(0);
-    
+    /*
     Lhand.write(90);
     Rhand.write(180);
     RemoteXYEngine.delay(1000);
     Lhand.write(0);
     Rhand.write(90);
     RemoteXYEngine.delay(1000);
-    
+    //*/
     ledcWrite(pin_led, 0);
   }
 
