@@ -65,11 +65,11 @@ struct {
 #include <AnalogMotorDriver.h>
 #include <ESP32Servo.h>
 
-const uint8_t pin_xmotor[] = {13,15};
-const uint8_t pin_ymotor[] = {14,27};
-const uint8_t pin_zmotor[] = {26,25};
-const uint8_t pin_rhand = 33;
-const uint8_t pin_lhand = 15;
+const uint8_t pin_xmotor[] = {14,27};
+const uint8_t pin_ymotor[] = {26,25};
+const uint8_t pin_zmotor[] = {33,32};
+const uint8_t pin_rhand = 18;
+const uint8_t pin_lhand = 19;
 const uint8_t pin_led = 2;
 
 
