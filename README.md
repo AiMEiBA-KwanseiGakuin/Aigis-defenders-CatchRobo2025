@@ -22,5 +22,5 @@
 
 ---
 
-作成者:金栄
+作成者:https://github.com/Tomoooji  
 最終更新:2026/04/06
