@@ -1,7 +1,13 @@
 # Aigis_ver2
 
-キャチロボバトルコンテスト2025のdefendersチームの機体(Aigis)のコード整理用リポジトリ  
+キャチロボバトルコンテスト2025のdefendersチームの機体(Aigis)のコード整理用リポジトリ
 <Mainsサークル紹介(2026/04/08)にて操作体験用に書き直したもの>
+
+## 実行環境
+- Arduino IDE   ver:2.3.8
+- ESP32         ver:3.3.0
+- ESP32Servo    ver:3.1.3
+- RemoteXY      ver:4.1.9
 
 ## 操縦方法
 
@@ -22,5 +28,5 @@
 
 ---
 
-作成者:https://github.com/Tomoooji  
-最終更新:2026/04/06
+作成者:https://github.com/Tomoooji
+最終更新:2026/04/13
